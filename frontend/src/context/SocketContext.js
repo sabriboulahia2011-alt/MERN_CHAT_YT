@@ -1,8 +1,15 @@
 import { createContext, useState, useEffect, useContext } from "react";
 import { useAuthContext } from "./AuthContext";
 import io from "socket.io-client";
+import dotenv from "dotenv";
+import process from "node:process";
+
+// Load environment variables from .env file
+dotenv.config();
 
 const SocketContext = createContext();
+
+const url = process.env.REACT_APP_URL_DEPLOYED || `localhost:${process.env.PORT}`;
 
 export const useSocketContext = () => {
     return useContext(SocketContext);
@@ -15,7 +22,7 @@ export const SocketContextProvider = ({ children }) => {
 
     useEffect(() => {
         if (authUser) {
-            const socket = io("https://chat-app-yt.onrender.com", {
+            const socket = io(url, {
                 query: {
                     userId: authUser._id,
                 },
@@ -23,7 +30,6 @@ export const SocketContextProvider = ({ children }) => {
 
             setSocket(socket);
 
-            // socket.on() is used to listen to the events. can be used both on client and server side
             socket.on("getOnlineUsers", (users) => {
                 setOnlineUsers(users);
             });
